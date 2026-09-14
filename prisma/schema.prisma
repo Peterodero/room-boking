@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  GUEST
+  HOST
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING     // hold placed, awaiting payment
+  CONFIRMED   // booking fee paid
+  CANCELLED
+  EXPIRED     // pending hold timed out unpaid
+}
+
+enum PaymentType {
+  BOOKING_FEE
+  FULL_PAYMENT
+  REFUND
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  role          Role      @default(GUEST)
+  isUSCitizen   Boolean   @default(false)
+  citizenshipVerifiedAt DateTime?
+  createdAt     DateTime  @default(now())
+
+  listings      Listing[] @relation("HostListings")
+  bookings      Booking[] @relation("GuestBookings")
+}
+
+model Listing {
+  id          String    @id @default(cuid())
+  hostId      String
+  host        User      @relation("HostListings", fields: [hostId], references: [id])
+  title       String
+  description String
+  address     String
+  city        String
+  state       String
+  pricePerNight Decimal @db.Decimal(10, 2)
+  bookingFee  Decimal   @db.Decimal(10, 2) @default(0)
+  maxGuests   Int       @default(1)
+  amenities   String[]
+  photos      String[]
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  bookings    Booking[]
+
+  @@index([city, state])
+}
+
+model Booking {
+  id           String        @id @default(cuid())
+  listingId    String
+  listing      Listing       @relation(fields: [listingId], references: [id])
+  guestId      String
+  guest        User          @relation("GuestBookings", fields: [guestId], references: [id])
+  checkIn      DateTime
+  checkOut     DateTime
+  guestCount   Int           @default(1)
+  totalPrice   Decimal       @db.Decimal(10, 2)
+  bookingFee   Decimal       @db.Decimal(10, 2)
+  status       BookingStatus @default(PENDING)
+  holdExpiresAt DateTime?    // null once confirmed/cancelled/expired
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  payments     Payment[]
+
+  // Prevent overlapping CONFIRMED/PENDING bookings for the same listing
+  @@index([listingId, checkIn, checkOut])
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  bookingId       String
+  booking         Booking       @relation(fields: [bookingId], references: [id])
+  squarePaymentId String?       @unique
+  amount          Decimal       @db.Decimal(10, 2)
+  type            PaymentType
+  status          PaymentStatus @default(PENDING)
+  rawResponse     Json?
+  createdAt       DateTime      @default(now())
+}
