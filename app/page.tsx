@@ -63,23 +63,23 @@ export default function HomePage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
       {/* Hero Header */}
       <section className="text-center pt-8 pb-4 relative">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-semibold uppercase tracking-wider mb-4">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/30 text-brand-700 dark:text-brand-400 text-xs font-semibold uppercase tracking-wider mb-4">
           <span>🇺🇸</span> Exclusive US Citizen Room Rentals
         </div>
-        <h1 className="text-4xl sm:text-6xl font-extrabold font-heading text-white tracking-tight leading-tight">
+        <h1 className="text-4xl sm:text-6xl font-extrabold font-heading text-slate-900 dark:text-white tracking-tight leading-tight">
           Find & Reserve Your Room <br className="hidden sm:block" />
-          <span className="bg-gradient-to-r from-brand-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-brand-600 via-indigo-600 to-purple-600 dark:from-brand-400 dark:via-indigo-300 dark:to-purple-400 bg-clip-text text-transparent">
             Across the United States
           </span>
         </h1>
-        <p className="mt-4 text-base sm:text-lg text-slate-400 max-w-2xl mx-auto">
+        <p className="mt-4 text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
           Reserve holds instantly with guaranteed date overlap locks. Pay room booking fees seamlessly via Cash App Pay.
         </p>
 
         {/* Search Bar Card */}
-        <div className="mt-8 max-w-4xl mx-auto glass-panel rounded-2xl p-4 sm:p-6 text-left shadow-2xl space-y-4 sm:space-y-0 sm:grid sm:grid-cols-4 sm:gap-4 items-end">
+        <div className="mt-8 max-w-4xl mx-auto glass-panel rounded-2xl p-4 sm:p-6 text-left shadow-xl space-y-4 sm:space-y-0 sm:grid sm:grid-cols-4 sm:gap-4 items-end">
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-400 uppercase tracking-wider mb-1.5">
               City / Location
             </label>
             <input
@@ -87,21 +87,21 @@ export default function HomePage() {
               placeholder="e.g. Austin, Miami, Seattle"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-brand-500 transition-colors"
+              className="w-full bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-brand-500 transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-400 uppercase tracking-wider mb-1.5">
               State
             </label>
             <select
               value={selectedState}
               onChange={(e) => setSelectedState(e.target.value)}
-              className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 transition-colors"
+              className="w-full bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-brand-500 transition-colors"
             >
               {US_STATES.map((st) => (
-                <option key={st} value={st} className="bg-slate-900 text-white">
+                <option key={st} value={st} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
                   {st}
                 </option>
               ))}
@@ -109,7 +109,7 @@ export default function HomePage() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-400 uppercase tracking-wider mb-1.5">
               Guests
             </label>
             <input
@@ -118,7 +118,7 @@ export default function HomePage() {
               max={10}
               value={maxGuests}
               onChange={(e) => setMaxGuests(Number(e.target.value))}
-              className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 transition-colors"
+              className="w-full bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-brand-500 transition-colors"
             />
           </div>
 
@@ -135,12 +135,12 @@ export default function HomePage() {
 
       {/* Rentals Grid Header */}
       <section>
-        <div className="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
+        <div className="flex items-center justify-between mb-6 border-b border-slate-200 dark:border-white/10 pb-4">
           <div>
-            <h2 className="text-2xl font-bold font-heading text-white">Available Room Listings</h2>
-            <p className="text-sm text-slate-400">Showing verified rooms with instant Cash App hold reservations</p>
+            <h2 className="text-2xl font-bold font-heading text-slate-900 dark:text-white">Available Room Listings</h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400">Showing verified rooms with instant Cash App hold reservations</p>
           </div>
-          <span className="text-xs font-medium text-slate-400 bg-slate-900 border border-white/10 px-3 py-1.5 rounded-full">
+          <span className="text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-full">
             {listings.length} {listings.length === 1 ? "Room" : "Rooms"} Found
           </span>
         </div>
@@ -148,14 +148,14 @@ export default function HomePage() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-80 bg-slate-900/60 rounded-2xl border border-white/5" />
+              <div key={i} className="h-80 bg-slate-200 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-white/5" />
             ))}
           </div>
         ) : listings.length === 0 ? (
-          <div className="text-center py-16 bg-slate-900/40 rounded-2xl border border-white/5 space-y-3">
+          <div className="text-center py-16 bg-white dark:bg-slate-900/40 rounded-2xl border border-slate-200 dark:border-white/5 space-y-3 shadow-lg dark:shadow-none">
             <div className="text-4xl">🏡</div>
-            <h3 className="text-lg font-semibold text-slate-200">No rooms found</h3>
-            <p className="text-sm text-slate-400 max-w-sm mx-auto">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-200">No rooms found</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400 max-w-sm mx-auto">
               No active room listings matched your search location. Try clearing filters or list a new room as a host!
             </p>
             <Link
@@ -173,38 +173,38 @@ export default function HomePage() {
                 <Link
                   key={l.id}
                   href={`/listings/${l.id}`}
-                  className="group bg-slate-900/80 border border-white/10 rounded-2xl overflow-hidden hover:border-brand-500/50 hover:shadow-2xl hover:shadow-brand-500/10 transition-all duration-300 flex flex-col"
+                  className="group bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden hover:border-brand-500/50 hover:shadow-2xl hover:shadow-brand-500/10 transition-all duration-300 flex flex-col"
                 >
-                  <div className="relative h-48 w-full overflow-hidden bg-slate-950">
+                  <div className="relative h-48 w-full overflow-hidden bg-slate-100 dark:bg-slate-950">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={photo}
                       alt={l.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-full text-xs font-semibold text-slate-200 border border-white/10 flex items-center gap-1">
+                    <div className="absolute top-3 left-3 bg-white/90 dark:bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-full text-xs font-semibold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10 flex items-center gap-1 shadow-sm">
                       <span>📍</span> {l.city}, {l.state}
                     </div>
-                    <div className="absolute top-3 right-3 bg-emerald-500/90 text-white px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase shadow">
+                    <div className="absolute top-3 right-3 bg-emerald-600 dark:bg-emerald-500/90 text-white px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase shadow">
                       {l.maxGuests} {l.maxGuests === 1 ? "Guest" : "Guests"}
                     </div>
                   </div>
 
                   <div className="p-5 flex flex-col flex-1">
-                    <h3 className="font-heading font-bold text-lg text-white group-hover:text-brand-400 transition-colors line-clamp-1">
+                    <h3 className="font-heading font-bold text-lg text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors line-clamp-1">
                       {l.title}
                     </h3>
-                    <p className="text-xs text-slate-400 line-clamp-2 mt-1 mb-4 flex-1">
+                    <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 mt-1 mb-4 flex-1">
                       {l.description || "Beautiful private room rental available in prime US location."}
                     </p>
 
-                    <div className="pt-3 border-t border-white/10 flex items-baseline justify-between">
+                    <div className="pt-3 border-t border-slate-100 dark:border-white/10 flex items-baseline justify-between">
                       <div>
-                        <span className="text-xl font-extrabold text-white">${l.pricePerNight}</span>
-                        <span className="text-xs text-slate-400"> / night</span>
+                        <span className="text-xl font-extrabold text-slate-900 dark:text-white">${l.pricePerNight}</span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400"> / night</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-500/20">
+                        <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-200 dark:border-emerald-500/20">
                           Hold fee: ${l.bookingFee}
                         </span>
                       </div>

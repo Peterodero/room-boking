@@ -6,7 +6,7 @@
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col;
+    @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans antialiased min-h-screen flex flex-col transition-colors duration-200;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading;
@@ -14,7 +14,7 @@
 }
 
 .glass-panel {
-  @apply bg-slate-900/75 backdrop-blur-md border border-white/10 shadow-xl;
+  @apply bg-white/90 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-white/10 shadow-xl shadow-slate-200/40 dark:shadow-none transition-colors duration-200;
 }
 
 /* Square Cash App Pay container */
