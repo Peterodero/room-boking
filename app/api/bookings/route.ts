@@ -5,12 +5,24 @@ import { getUser } from "../../../lib/auth";
 
 const HOLD_MINUTES = Number(process.env.BOOKING_HOLD_MINUTES || 15);
 
-const createBookingSchema = z.object({
+// Schema for nightly booking
+const nightlySchema = z.object({
   listingId: z.string(),
+  bookingType: z.literal("NIGHTLY"),
   checkIn: z.string(),
   checkOut: z.string(),
   guestCount: z.number().int().positive().default(1),
 });
+
+// Schema for monthly booking
+const monthlySchema = z.object({
+  listingId: z.string(),
+  bookingType: z.literal("MONTHLY"),
+  moveInDate: z.string(),
+  guestCount: z.number().int().positive().default(1),
+});
+
+const createBookingSchema = z.discriminatedUnion("bookingType", [nightlySchema, monthlySchema]);
 
 export async function POST(req: NextRequest) {
   const user = getUser(req);
@@ -23,13 +35,8 @@ export async function POST(req: NextRequest) {
   }
 
   const { listingId, guestCount } = parsed.data;
-  const checkIn = new Date(parsed.data.checkIn);
-  const checkOut = new Date(parsed.data.checkOut);
-  if (checkOut <= checkIn) {
-    return NextResponse.json({ error: "checkOut must be after checkIn" }, { status: 400 });
-  }
 
-  const listing = await prisma.listing.findUnique({ where: { id: listingId } });
+  const listing = await (prisma.listing as any).findUnique({ where: { id: listingId } });
   if (!listing || !listing.isActive) {
     return NextResponse.json({ error: "Listing not found" }, { status: 404 });
   }
@@ -40,11 +47,43 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // ── MONTHLY BOOKING ──────────────────────────────────────────────────────
+  if (parsed.data.bookingType === "MONTHLY") {
+    if (listing.listingType !== "MONTHLY") {
+      return NextResponse.json({ error: "This listing is not available for monthly rental" }, { status: 400 });
+    }
+
+    const moveInDate = new Date(parsed.data.moveInDate);
+    const depositAmount = Number(listing.depositAmount) || 0;
+
+    const booking = await (prisma.booking as any).create({
+      data: {
+        listingId,
+        guestId: user.id,
+        guestCount,
+        totalPrice: depositAmount,        // total due online = deposit
+        bookingFee: listing.bookingFee,
+        status: "PENDING",                // nightly status unused but required
+        monthlyStatus: "RESERVED",
+        moveInDate,
+        depositAmount,
+        holdExpiresAt: new Date(Date.now() + HOLD_MINUTES * 60 * 1000),
+      },
+    });
+
+    return NextResponse.json(booking, { status: 201 });
+  }
+
+  // ── NIGHTLY BOOKING ───────────────────────────────────────────────────────
+  const checkIn = new Date(parsed.data.checkIn);
+  const checkOut = new Date(parsed.data.checkOut);
+  if (checkOut <= checkIn) {
+    return NextResponse.json({ error: "checkOut must be after checkIn" }, { status: 400 });
+  }
+
   try {
-    const booking = await prisma.$transaction(async (tx) => {
-      // Lazy sweep: there's no always-on cron here (serverless + free tier),
-      // so expired holds are cleared out right before we need accurate
-      // availability, as part of the same transaction.
+    const booking = await (prisma as any).$transaction(async (tx: any) => {
+      // Lazy sweep: expire stale holds
       await tx.booking.updateMany({
         where: { listingId, status: "PENDING", holdExpiresAt: { lt: new Date() } },
         data: { status: "EXPIRED", holdExpiresAt: null },

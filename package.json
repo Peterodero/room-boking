@@ -8,7 +8,9 @@
     "start": "next start",
     "postinstall": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "admin:create": "node scripts/create-admin.js",
+    "db:seed": "node scripts/seed-rooms.js"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",

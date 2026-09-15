@@ -5,10 +5,10 @@ import { prisma } from "../../../../lib/prisma";
 import { signToken } from "../../../../lib/auth";
 
 const signupSchema = z.object({
+  username: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
   email: z.string().email(),
   password: z.string().min(8),
   name: z.string().min(1),
-  role: z.enum(["GUEST", "HOST"]).default("GUEST"),
   isUSCitizen: z.boolean(),
 });
 
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
-  const { email, password, name, role, isUSCitizen } = parsed.data;
+  const { username, email, password, name, isUSCitizen } = parsed.data;
 
   if (!isUSCitizen) {
     return NextResponse.json(
@@ -27,8 +27,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) {
+  const existingUsername = await prisma.user.findFirst({
+    where: { username: { equals: username, mode: "insensitive" } } as any,
+  });
+  if (existingUsername) {
+    return NextResponse.json(
+      { error: "That username is already taken. Please choose another." },
+      { status: 409 }
+    );
+  }
+
+  const existingEmail = await prisma.user.findUnique({ where: { email } });
+  if (existingEmail) {
     return NextResponse.json(
       { error: "An account with that email already exists" },
       { status: 409 }
@@ -37,7 +47,14 @@ export async function POST(req: NextRequest) {
 
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await prisma.user.create({
-    data: { email, passwordHash, name, role, isUSCitizen },
+    data: {
+      username,
+      email,
+      passwordHash,
+      name,
+      role: "GUEST",
+      isUSCitizen,
+    } as any,
   });
 
   const token = signToken(user);

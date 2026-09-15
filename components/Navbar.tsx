@@ -89,6 +89,16 @@ export default function Navbar() {
                 My Bookings
               </Link>
             )}
+            {user && (
+              <Link href="/my-rentals" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-violet-600 dark:hover:text-violet-400 transition-colors flex items-center gap-1">
+                📅 My Rentals
+              </Link>
+            )}
+            {user?.role === "ADMIN" && (
+              <Link href="/admin" className="text-sm font-bold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1">
+                🛡️ Admin Console
+              </Link>
+            )}
           </nav>
 
           {/* Controls & Auth State */}

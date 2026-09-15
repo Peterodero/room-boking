@@ -67,15 +67,21 @@ app/
   page.tsx                          Browse/search listings
   listings/[id]/page.tsx            Listing detail + reserve (creates a hold)
   booking/[id]/checkout/page.tsx    Cash App Pay button, final step
-  booking/[id]/confirmation/page.tsx
+  booking/[id]/confirmation/page.tsx Confirmation page after successful payment
+  bookings/page.tsx                 Guest room reservations dashboard
+  host/create/page.tsx              Host listing creation page
+  host/listings/page.tsx            Host properties dashboard
+  admin/page.tsx                    System Admin console & control panel
   api/
-    auth/signup, auth/login
-    listings/                       GET (search), POST (host creates listing)
-    listings/[id]/                  GET
-    bookings/                       POST (create hold)
+    auth/signup, auth/login         User registration (Username, Email, US attestation) & Username authentication
+    listings/                       GET (search listings), POST (host creates listing)
+    listings/[id]/                  GET (listing details)
+    bookings/                       POST (create hold), GET (my bookings)
     bookings/[id]/                  GET (lazy-expires stale holds)
-    bookings/[id]/cancel/           POST
+    bookings/[id]/cancel/           POST (cancel active hold)
     payments/booking-fee/           POST — charges the Cash App Pay token
+    admin/stats, admin/users        Admin platform stats & user role management
+    admin/listings, admin/bookings  Admin property moderation & booking status overrides
 lib/
   prisma.ts, square.ts, auth.ts     Shared server-side helpers
   api.ts                            Client-side fetch wrapper (same-origin /api)

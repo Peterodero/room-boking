@@ -14,6 +14,11 @@ enum Role {
   ADMIN
 }
 
+enum ListingType {
+  NIGHTLY
+  MONTHLY
+}
+
 enum BookingStatus {
   PENDING     // hold placed, awaiting payment
   CONFIRMED   // booking fee paid
@@ -21,10 +26,17 @@ enum BookingStatus {
   EXPIRED     // pending hold timed out unpaid
 }
 
+enum MonthlyBookingStatus {
+  RESERVED      // hold placed, deposit not yet paid
+  DEPOSIT_PAID  // deposit received, tenancy confirmed
+  CANCELLED
+}
+
 enum PaymentType {
   BOOKING_FEE
   FULL_PAYMENT
   REFUND
+  DEPOSIT
 }
 
 enum PaymentStatus {
@@ -35,6 +47,7 @@ enum PaymentStatus {
 
 model User {
   id            String    @id @default(cuid())
+  username      String?   @unique
   email         String    @unique
   passwordHash  String
   name          String
@@ -48,47 +61,59 @@ model User {
 }
 
 model Listing {
-  id          String    @id @default(cuid())
-  hostId      String
-  host        User      @relation("HostListings", fields: [hostId], references: [id])
-  title       String
-  description String
-  address     String
-  city        String
-  state       String
-  pricePerNight Decimal @db.Decimal(10, 2)
-  bookingFee  Decimal   @db.Decimal(10, 2) @default(0)
-  maxGuests   Int       @default(1)
-  amenities   String[]
-  photos      String[]
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
+  id            String      @id @default(cuid())
+  hostId        String
+  host          User        @relation("HostListings", fields: [hostId], references: [id])
+  listingType   ListingType @default(NIGHTLY)
+  title         String
+  description   String
+  address       String
+  city          String
+  state         String
+  // Nightly fields
+  pricePerNight Decimal?    @db.Decimal(10, 2)
+  bookingFee    Decimal     @db.Decimal(10, 2) @default(0)
+  // Monthly fields
+  pricePerMonth Decimal?    @db.Decimal(10, 2)
+  depositAmount Decimal?    @db.Decimal(10, 2)
+  maxGuests     Int         @default(1)
+  amenities     String[]
+  photos        String[]
+  isActive      Boolean     @default(true)
+  createdAt     DateTime    @default(now())
 
-  bookings    Booking[]
+  bookings      Booking[]
 
   @@index([city, state])
+  @@index([listingType])
 }
 
 model Booking {
-  id           String        @id @default(cuid())
-  listingId    String
-  listing      Listing       @relation(fields: [listingId], references: [id])
-  guestId      String
-  guest        User          @relation("GuestBookings", fields: [guestId], references: [id])
-  checkIn      DateTime
-  checkOut     DateTime
-  guestCount   Int           @default(1)
-  totalPrice   Decimal       @db.Decimal(10, 2)
-  bookingFee   Decimal       @db.Decimal(10, 2)
-  status       BookingStatus @default(PENDING)
-  holdExpiresAt DateTime?    // null once confirmed/cancelled/expired
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id             String                @id @default(cuid())
+  listingId      String
+  listing        Listing               @relation(fields: [listingId], references: [id])
+  guestId        String
+  guest          User                  @relation("GuestBookings", fields: [guestId], references: [id])
+  // Nightly booking fields
+  checkIn        DateTime?
+  checkOut       DateTime?
+  guestCount     Int                   @default(1)
+  totalPrice     Decimal               @db.Decimal(10, 2)
+  bookingFee     Decimal               @db.Decimal(10, 2)
+  status         BookingStatus         @default(PENDING)
+  holdExpiresAt  DateTime?
+  // Monthly booking fields
+  monthlyStatus  MonthlyBookingStatus?
+  moveInDate     DateTime?
+  depositAmount  Decimal?              @db.Decimal(10, 2)
+  depositPaidAt  DateTime?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
 
-  payments     Payment[]
+  payments       Payment[]
 
-  // Prevent overlapping CONFIRMED/PENDING bookings for the same listing
   @@index([listingId, checkIn, checkOut])
+  @@index([guestId, monthlyStatus])
 }
 
 model Payment {

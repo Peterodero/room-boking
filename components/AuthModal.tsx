@@ -5,6 +5,7 @@ import { api } from "../lib/api";
 
 export type User = {
   id?: string;
+  username?: string;
   name: string;
   email: string;
   role: string;
@@ -19,11 +20,11 @@ type Props = {
 
 export default function AuthModal({ mode: initialMode, onClose, onSuccess }: Props) {
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
-  const [role, setRole] = useState<"GUEST" | "HOST">("GUEST");
   const [isUSCitizen, setIsUSCitizen] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -41,17 +42,17 @@ export default function AuthModal({ mode: initialMode, onClose, onSuccess }: Pro
           return;
         }
         const data = await api.post("/auth/signup", {
+          username,
           email,
           password,
           name,
-          role,
           isUSCitizen,
         });
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         onSuccess(data.user);
       } else {
-        const data = await api.post("/auth/login", { email, password });
+        const data = await api.post("/auth/login", { username, password });
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         onSuccess(data.user);
@@ -112,7 +113,7 @@ export default function AuthModal({ mode: initialMode, onClose, onSuccess }: Pro
               <input
                 type="text"
                 required
-                placeholder="Jane Doe"
+                placeholder="Karl Peters"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-brand-500 transition-colors"
@@ -122,17 +123,33 @@ export default function AuthModal({ mode: initialMode, onClose, onSuccess }: Pro
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-              Email Address
+              Username
             </label>
             <input
-              type="email"
+              type="text"
               required
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              placeholder="e.g. peters"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-brand-500 transition-colors"
             />
           </div>
+
+          {mode === "signup" && (
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                Email Address
+              </label>
+              <input
+                type="email"
+                required
+                placeholder="peter@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-brand-500 transition-colors"
+              />
+            </div>
+          )}
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
@@ -170,52 +187,19 @@ export default function AuthModal({ mode: initialMode, onClose, onSuccess }: Pro
           </div>
 
           {mode === "signup" && (
-            <>
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                  Account Purpose
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setRole("GUEST")}
-                    className={`py-2 px-3 rounded-lg text-xs font-semibold border transition-all ${
-                      role === "GUEST"
-                        ? "bg-brand-50 dark:bg-brand-600/20 border-brand-500 text-brand-700 dark:text-white"
-                        : "bg-slate-50 dark:bg-slate-950/40 border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
-                    }`}
-                  >
-                    🧳 Book Rooms (Guest)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRole("HOST")}
-                    className={`py-2 px-3 rounded-lg text-xs font-semibold border transition-all ${
-                      role === "HOST"
-                        ? "bg-brand-50 dark:bg-brand-600/20 border-brand-500 text-brand-700 dark:text-white"
-                        : "bg-slate-50 dark:bg-slate-950/40 border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
-                    }`}
-                  >
-                    🏡 Host Rooms (Host)
-                  </button>
-                </div>
-              </div>
-
-              {/* US Citizenship Attestation Checkbox */}
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-emerald-500/30 space-y-2">
-                <label className="flex items-start gap-2.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={isUSCitizen}
-                    onChange={(e) => setIsUSCitizen(e.target.checked)}
-                    className="mt-0.5 w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
-                  />
-                  <span className="text-xs text-slate-700 dark:text-slate-300 leading-tight">
-                    I self-attest that I am a <strong>US Citizen or Permanent Resident</strong> as required for room bookings on this platform.
-                  </span>
-                </label>
-              </div>
-            </>
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-emerald-500/30 space-y-2">
+              <label className="flex items-start gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isUSCitizen}
+                  onChange={(e) => setIsUSCitizen(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                />
+                <span className="text-xs text-slate-700 dark:text-slate-300 leading-tight">
+                  I self-attest that I am a <strong>US Citizen or Permanent Resident</strong> as required for room bookings on this platform.
+                </span>
+              </label>
+            </div>
           )}
 
           <button

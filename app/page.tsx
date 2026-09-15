@@ -4,14 +4,19 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "../lib/api";
 
+type ListingType = "NIGHTLY" | "MONTHLY";
+
 type Listing = {
   id: string;
+  listingType: ListingType;
   title: string;
   description: string;
   city: string;
   state: string;
-  pricePerNight: string;
+  pricePerNight?: string;
+  pricePerMonth?: string;
   bookingFee: string;
+  depositAmount?: string;
   maxGuests: number;
   photos: string[];
   amenities: string[];
@@ -25,23 +30,26 @@ const DEFAULT_PHOTOS = [
 ];
 
 const US_STATES = [
-  "All States", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", 
-  "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", 
-  "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", 
-  "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", 
+  "All States", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
+  "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI",
+  "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND",
+  "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA",
   "WA", "WV", "WI", "WY"
 ];
 
 export default function HomePage() {
+  const [activeTab, setActiveTab] = useState<ListingType>("NIGHTLY");
   const [listings, setListings] = useState<Listing[]>([]);
   const [city, setCity] = useState("");
   const [selectedState, setSelectedState] = useState("All States");
   const [maxGuests, setMaxGuests] = useState(1);
   const [loading, setLoading] = useState(true);
 
-  async function search() {
+  async function search(type?: ListingType) {
+    const t = type ?? activeTab;
     setLoading(true);
     const params = new URLSearchParams();
+    params.set("type", t);
     if (city) params.set("city", city);
     if (selectedState && selectedState !== "All States") params.set("state", selectedState);
     try {
@@ -52,6 +60,11 @@ export default function HomePage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function switchTab(tab: ListingType) {
+    setActiveTab(tab);
+    search(tab);
   }
 
   useEffect(() => {
@@ -67,17 +80,39 @@ export default function HomePage() {
           <span>🇺🇸</span> Exclusive US Citizen Room Rentals
         </div>
         <h1 className="text-4xl sm:text-6xl font-extrabold font-heading text-slate-900 dark:text-white tracking-tight leading-tight">
-          Find & Reserve Your Room <br className="hidden sm:block" />
+          Find &amp; Reserve Your Room <br className="hidden sm:block" />
           <span className="bg-gradient-to-r from-brand-600 via-indigo-600 to-purple-600 dark:from-brand-400 dark:via-indigo-300 dark:to-purple-400 bg-clip-text text-transparent">
             Across the United States
           </span>
         </h1>
         <p className="mt-4 text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-          Reserve holds instantly with guaranteed date overlap locks. Pay room booking fees seamlessly via Cash App Pay.
+          Book a nightly stay or secure a monthly rental — instant holds, Cash App payments.
         </p>
 
+        {/* Listing Type Tabs */}
+        <div className="mt-8 flex justify-center">
+          <div className="inline-flex rounded-2xl bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 p-1.5 gap-1 shadow-inner">
+            {(["NIGHTLY", "MONTHLY"] as ListingType[]).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => switchTab(tab)}
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
+                  activeTab === tab
+                    ? tab === "NIGHTLY"
+                      ? "bg-brand-600 text-white shadow-lg shadow-brand-600/30"
+                      : "bg-violet-600 text-white shadow-lg shadow-violet-600/30"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                <span>{tab === "NIGHTLY" ? "🌙" : "📅"}</span>
+                {tab === "NIGHTLY" ? "Nightly Stays" : "Monthly Rentals"}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Search Bar Card */}
-        <div className="mt-8 max-w-4xl mx-auto glass-panel rounded-2xl p-4 sm:p-6 text-left shadow-xl space-y-4 sm:space-y-0 sm:grid sm:grid-cols-4 sm:gap-4 items-end">
+        <div className="mt-6 max-w-4xl mx-auto glass-panel rounded-2xl p-4 sm:p-6 text-left shadow-xl space-y-4 sm:space-y-0 sm:grid sm:grid-cols-4 sm:gap-4 items-end">
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-400 uppercase tracking-wider mb-1.5">
               City / Location
@@ -87,6 +122,7 @@ export default function HomePage() {
               placeholder="e.g. Austin, Miami, Seattle"
               value={city}
               onChange={(e) => setCity(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && search()}
               className="w-full bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-brand-500 transition-colors"
             />
           </div>
@@ -110,7 +146,7 @@ export default function HomePage() {
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-              Guests
+              {activeTab === "NIGHTLY" ? "Guests" : "Tenants"}
             </label>
             <input
               type="number"
@@ -124,21 +160,31 @@ export default function HomePage() {
 
           <div>
             <button
-              onClick={search}
-              className="w-full py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 font-semibold text-sm text-white shadow-lg shadow-brand-600/30 transition-all flex items-center justify-center gap-2"
+              onClick={() => search()}
+              className={`w-full py-2.5 rounded-xl font-semibold text-sm text-white shadow-lg transition-all flex items-center justify-center gap-2 ${
+                activeTab === "NIGHTLY"
+                  ? "bg-brand-600 hover:bg-brand-500 shadow-brand-600/30"
+                  : "bg-violet-600 hover:bg-violet-500 shadow-violet-600/30"
+              }`}
             >
-              <span>🔍</span> Search Rentals
+              <span>🔍</span> Search {activeTab === "NIGHTLY" ? "Stays" : "Rentals"}
             </button>
           </div>
         </div>
       </section>
 
-      {/* Rentals Grid Header */}
+      {/* Listings Grid */}
       <section>
         <div className="flex items-center justify-between mb-6 border-b border-slate-200 dark:border-white/10 pb-4">
           <div>
-            <h2 className="text-2xl font-bold font-heading text-slate-900 dark:text-white">Available Room Listings</h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Showing verified rooms with instant Cash App hold reservations</p>
+            <h2 className="text-2xl font-bold font-heading text-slate-900 dark:text-white">
+              {activeTab === "NIGHTLY" ? "🌙 Available Nightly Stays" : "📅 Monthly Rental Listings"}
+            </h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              {activeTab === "NIGHTLY"
+                ? "Verified rooms with instant Cash App hold reservations"
+                : "Long-term rooms — pay deposit online, rent at the property"}
+            </p>
           </div>
           <span className="text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-full">
             {listings.length} {listings.length === 1 ? "Room" : "Rooms"} Found
@@ -153,22 +199,25 @@ export default function HomePage() {
           </div>
         ) : listings.length === 0 ? (
           <div className="text-center py-16 bg-white dark:bg-slate-900/40 rounded-2xl border border-slate-200 dark:border-white/5 space-y-3 shadow-lg dark:shadow-none">
-            <div className="text-4xl">🏡</div>
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-200">No rooms found</h3>
+            <div className="text-4xl">{activeTab === "NIGHTLY" ? "🌙" : "📅"}</div>
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-200">
+              No {activeTab === "NIGHTLY" ? "nightly stays" : "monthly rentals"} found
+            </h3>
             <p className="text-sm text-slate-600 dark:text-slate-400 max-w-sm mx-auto">
-              No active room listings matched your search location. Try clearing filters or list a new room as a host!
+              No active listings matched your search. Try clearing filters or create a new listing!
             </p>
             <Link
               href="/host/create"
               className="inline-block mt-2 px-4 py-2 rounded-xl bg-brand-600 text-white font-medium text-sm hover:bg-brand-500 transition-colors"
             >
-              + Create First Room Listing
+              + Create First Listing
             </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {listings.map((l, index) => {
               const photo = l.photos?.[0] || DEFAULT_PHOTOS[index % DEFAULT_PHOTOS.length];
+              const isMonthly = l.listingType === "MONTHLY";
               return (
                 <Link
                   key={l.id}
@@ -185,8 +234,11 @@ export default function HomePage() {
                     <div className="absolute top-3 left-3 bg-white/90 dark:bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-full text-xs font-semibold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10 flex items-center gap-1 shadow-sm">
                       <span>📍</span> {l.city}, {l.state}
                     </div>
-                    <div className="absolute top-3 right-3 bg-emerald-600 dark:bg-emerald-500/90 text-white px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase shadow">
-                      {l.maxGuests} {l.maxGuests === 1 ? "Guest" : "Guests"}
+                    {/* Listing type badge */}
+                    <div className={`absolute top-3 right-3 text-white px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase shadow ${
+                      isMonthly ? "bg-violet-600" : "bg-emerald-600"
+                    }`}>
+                      {isMonthly ? "📅 Monthly" : "🌙 Nightly"}
                     </div>
                   </div>
 
@@ -199,15 +251,31 @@ export default function HomePage() {
                     </p>
 
                     <div className="pt-3 border-t border-slate-100 dark:border-white/10 flex items-baseline justify-between">
-                      <div>
-                        <span className="text-xl font-extrabold text-slate-900 dark:text-white">${l.pricePerNight}</span>
-                        <span className="text-xs text-slate-500 dark:text-slate-400"> / night</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-200 dark:border-emerald-500/20">
-                          Hold fee: ${l.bookingFee}
-                        </span>
-                      </div>
+                      {isMonthly ? (
+                        <>
+                          <div>
+                            <span className="text-xl font-extrabold text-slate-900 dark:text-white">${l.pricePerMonth}</span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400"> / month</span>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-[11px] font-semibold text-violet-700 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 px-2 py-1 rounded-md border border-violet-200 dark:border-violet-500/20">
+                              Deposit: ${l.depositAmount}
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div>
+                            <span className="text-xl font-extrabold text-slate-900 dark:text-white">${l.pricePerNight}</span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400"> / night</span>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-200 dark:border-emerald-500/20">
+                              Hold fee: ${l.bookingFee}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </Link>
