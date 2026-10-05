@@ -191,12 +191,14 @@ export default function AdminDashboardPage() {
       b.listing.title.toLowerCase().includes(bookingQuery.toLowerCase())
   );
 
-  if (error && error.includes("Admin access required")) {
+  if (error && (error.includes("Admin") || error.includes("Forbidden") || error.includes("Unauthorized"))) {
     return (
       <div className="max-w-md mx-auto my-20 p-8 glass-panel rounded-2xl text-center space-y-4">
-        <div className="text-4xl">🛡️</div>
-        <h2 className="text-xl font-bold text-white">Admin Access Restricted</h2>
-        <p className="text-sm text-slate-400">
+        <div className="w-14 h-14 mx-auto rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center">
+          <svg className="w-7 h-7 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+        </div>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white">Admin Access Restricted</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-400">
           You must be logged in with an <strong>ADMIN</strong> role to view this panel.
         </p>
         <Link
@@ -212,25 +214,25 @@ export default function AdminDashboardPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-white/10 pb-6">
         <div>
           <div className="flex items-center gap-2">
             <span className="px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-extrabold uppercase tracking-wider">
               🛡️ Master System Admin
             </span>
           </div>
-          <h1 className="text-3xl font-extrabold font-heading text-white mt-2">
+          <h1 className="text-3xl font-extrabold font-heading text-slate-900 dark:text-white mt-2">
             RoomStays Executive Console
           </h1>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
             Full oversight of platform accounts, listings, reservations & Cash App fee revenue
           </p>
         </div>
         <button
           onClick={loadAdminData}
-          className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-bold border border-white/10 transition-all flex items-center gap-2 w-fit shadow-md"
+          className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-white/10 transition-all flex items-center gap-2 w-fit shadow-md"
         >
-          <span>🔄</span> Refresh Data
+          <span>↺</span> Refresh Data
         </button>
       </div>
 
@@ -250,13 +252,13 @@ export default function AdminDashboardPage() {
       )}
 
       {/* Tabs Navigation */}
-      <div className="flex border-b border-white/10 gap-2 overflow-x-auto">
+      <div className="flex border-b border-slate-200 dark:border-white/10 gap-2 overflow-x-auto">
         <button
           onClick={() => setActiveTab("overview")}
           className={`px-5 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
             activeTab === "overview"
               ? "border-brand-500 text-brand-400 font-bold"
-              : "border-transparent text-slate-400 hover:text-slate-200"
+              : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
           }`}
         >
           📊 System Overview
@@ -266,7 +268,7 @@ export default function AdminDashboardPage() {
           className={`px-5 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
             activeTab === "users"
               ? "border-brand-500 text-brand-400 font-bold"
-              : "border-transparent text-slate-400 hover:text-slate-200"
+              : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
           }`}
         >
           👥 User Accounts ({users.length})
@@ -276,7 +278,7 @@ export default function AdminDashboardPage() {
           className={`px-5 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
             activeTab === "listings"
               ? "border-brand-500 text-brand-400 font-bold"
-              : "border-transparent text-slate-400 hover:text-slate-200"
+              : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
           }`}
         >
           🏡 Property Listings ({listings.length})
@@ -286,7 +288,7 @@ export default function AdminDashboardPage() {
           className={`px-5 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
             activeTab === "bookings"
               ? "border-brand-500 text-brand-400 font-bold"
-              : "border-transparent text-slate-400 hover:text-slate-200"
+              : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
           }`}
         >
           🧳 Reservations & Holds ({bookings.length})
@@ -308,7 +310,7 @@ export default function AdminDashboardPage() {
                   <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
                     Total Registered Users
                   </p>
-                  <p className="text-3xl font-extrabold text-white">{stats.totalUsers}</p>
+                  <p className="text-3xl font-extrabold text-slate-900 dark:text-white">{stats.totalUsers}</p>
                   <p className="text-xs text-slate-400">Guests, Hosts & Admin</p>
                 </div>
 
@@ -347,23 +349,23 @@ export default function AdminDashboardPage() {
 
               {/* Quick Actions Panel */}
               <div className="glass-panel rounded-2xl p-6 space-y-4">
-                <h3 className="text-lg font-bold text-white">System Operations</h3>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">System Operations</h3>
                 <div className="flex flex-wrap gap-3">
                   <button
                     onClick={() => setActiveTab("users")}
-                    className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-bold border border-white/10 transition-all"
+                    className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-white/10 transition-all"
                   >
                     👤 Account Roles & Permissions
                   </button>
                   <button
                     onClick={() => setActiveTab("listings")}
-                    className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-bold border border-white/10 transition-all"
+                    className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-white/10 transition-all"
                   >
                     🏡 Moderate Properties & Listings
                   </button>
                   <button
                     onClick={() => setActiveTab("bookings")}
-                    className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-bold border border-white/10 transition-all"
+                    className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-white/10 transition-all"
                   >
                     🧳 Inspect Holds & Force Statuses
                   </button>
@@ -381,15 +383,15 @@ export default function AdminDashboardPage() {
                   placeholder="🔍 Search users by name or email..."
                   value={userQuery}
                   onChange={(e) => setUserQuery(e.target.value)}
-                  className="bg-slate-950 border border-white/10 rounded-xl px-4 py-2 text-xs text-white placeholder-slate-500 w-full sm:w-80 focus:outline-none focus:border-brand-500"
+                  className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 w-full sm:w-80 focus:outline-none focus:border-brand-500"
                 />
                 <span className="text-xs text-slate-400">Showing {filteredUsers.length} of {users.length} users</span>
               </div>
 
               <div className="glass-panel rounded-2xl overflow-hidden shadow-xl">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm text-slate-300">
-                    <thead className="bg-slate-950/80 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-white/10">
+                  <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+                    <thead className="bg-slate-100 dark:bg-slate-950/80 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-white/10">
                       <tr>
                         <th className="px-6 py-4">User</th>
                         <th className="px-6 py-4">Email</th>
@@ -401,8 +403,8 @@ export default function AdminDashboardPage() {
                     </thead>
                     <tbody className="divide-y divide-white/5">
                       {filteredUsers.map((u) => (
-                        <tr key={u.id} className="hover:bg-slate-900/40">
-                          <td className="px-6 py-4 font-semibold text-white">{u.name}</td>
+                        <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/40">
+                          <td className="px-6 py-4 font-semibold text-slate-900 dark:text-white">{u.name}</td>
                           <td className="px-6 py-4 text-slate-400">{u.email}</td>
                           <td className="px-6 py-4">
                             <span
@@ -431,7 +433,7 @@ export default function AdminDashboardPage() {
                             <select
                               value={u.role}
                               onChange={(e) => handleRoleChange(u.id, e.target.value as any)}
-                              className="bg-slate-950 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-brand-500"
+                              className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-brand-500"
                             >
                               <option value="GUEST">GUEST</option>
                               <option value="HOST">HOST</option>
@@ -456,7 +458,7 @@ export default function AdminDashboardPage() {
                   placeholder="🔍 Search properties by title, city, state, host..."
                   value={listingQuery}
                   onChange={(e) => setListingQuery(e.target.value)}
-                  className="bg-slate-950 border border-white/10 rounded-xl px-4 py-2 text-xs text-white placeholder-slate-500 w-full sm:w-80 focus:outline-none focus:border-brand-500"
+                  className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 w-full sm:w-80 focus:outline-none focus:border-brand-500"
                 />
                 <span className="text-xs text-slate-400">Showing {filteredListings.length} of {listings.length} listings</span>
               </div>
@@ -464,7 +466,7 @@ export default function AdminDashboardPage() {
               <div className="glass-panel rounded-2xl overflow-hidden shadow-xl">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm text-slate-300">
-                    <thead className="bg-slate-950/80 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-white/10">
+                    <thead className="bg-slate-100 dark:bg-slate-950/80 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-white/10">
                       <tr>
                         <th className="px-6 py-4">Property</th>
                         <th className="px-6 py-4">Location</th>
@@ -477,9 +479,9 @@ export default function AdminDashboardPage() {
                     </thead>
                     <tbody className="divide-y divide-white/5">
                       {filteredListings.map((l) => (
-                        <tr key={l.id} className="hover:bg-slate-900/40">
-                          <td className="px-6 py-4 font-semibold text-white">
-                            <Link href={`/listings/${l.id}`} className="hover:text-brand-400">
+                        <tr key={l.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/40">
+                          <td className="px-6 py-4 font-semibold text-slate-900 dark:text-white">
+                            <Link href={`/listings/${l.id}`} className="hover:text-brand-600 dark:hover:text-brand-400">
                               {l.title}
                             </Link>
                           </td>
@@ -490,7 +492,7 @@ export default function AdminDashboardPage() {
                             <div className="font-semibold text-white">{l.host.name}</div>
                             <div className="text-slate-400">{l.host.email}</div>
                           </td>
-                          <td className="px-6 py-4 text-white font-bold">
+                          <td className="px-6 py-4 text-slate-900 dark:text-white font-bold">
                             ${Number(l.pricePerNight).toFixed(2)}
                           </td>
                           <td className="px-6 py-4 text-brand-400 font-bold">
@@ -543,7 +545,7 @@ export default function AdminDashboardPage() {
                   placeholder="🔍 Search bookings by ID, guest name, email, listing..."
                   value={bookingQuery}
                   onChange={(e) => setBookingQuery(e.target.value)}
-                  className="bg-slate-950 border border-white/10 rounded-xl px-4 py-2 text-xs text-white placeholder-slate-500 w-full sm:w-80 focus:outline-none focus:border-brand-500"
+                  className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 w-full sm:w-80 focus:outline-none focus:border-brand-500"
                 />
                 <span className="text-xs text-slate-400">Showing {filteredBookings.length} of {bookings.length} bookings</span>
               </div>
@@ -551,7 +553,7 @@ export default function AdminDashboardPage() {
               <div className="glass-panel rounded-2xl overflow-hidden shadow-xl">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm text-slate-300">
-                    <thead className="bg-slate-950/80 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-white/10">
+                    <thead className="bg-slate-100 dark:bg-slate-950/80 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-white/10">
                       <tr>
                         <th className="px-6 py-4">Booking ID</th>
                         <th className="px-6 py-4">Listing & Guest</th>
@@ -563,12 +565,12 @@ export default function AdminDashboardPage() {
                     </thead>
                     <tbody className="divide-y divide-white/5">
                       {filteredBookings.map((b) => (
-                        <tr key={b.id} className="hover:bg-slate-900/40">
+                        <tr key={b.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/40">
                           <td className="px-6 py-4 font-mono text-xs text-slate-400">
                             {b.id.slice(0, 12)}...
                           </td>
                           <td className="px-6 py-4">
-                            <div className="font-semibold text-white">{b.listing.title}</div>
+                            <div className="font-semibold text-slate-900 dark:text-white">{b.listing.title}</div>
                             <div className="text-xs text-slate-400">
                               Guest: {b.guest.name} ({b.guest.email})
                             </div>
@@ -597,7 +599,7 @@ export default function AdminDashboardPage() {
                             <select
                               value={b.status}
                               onChange={(e) => handleBookingStatusChange(b.id, e.target.value)}
-                              className="bg-slate-950 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-brand-500"
+                              className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-brand-500"
                             >
                               <option value="PENDING">PENDING</option>
                               <option value="CONFIRMED">CONFIRMED</option>

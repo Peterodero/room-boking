@@ -8,13 +8,15 @@ export async function GET(req: NextRequest) {
   const city = searchParams.get("city");
   const state = searchParams.get("state");
   const type = searchParams.get("type"); // "NIGHTLY" | "MONTHLY"
+  const roomCategory = searchParams.get("roomCategory");
   const checkIn = searchParams.get("checkIn");
   const checkOut = searchParams.get("checkOut");
 
   const where: any = { isActive: true };
   if (city) where.city = { contains: city, mode: "insensitive" };
-  if (state && state !== "All States") where.state = { equals: state, mode: "insensitive" };
-  if (type === "NIGHTLY" || type === "MONTHLY") where.listingType = type;
+  if (state && state !== "All States") where.state = { contains: state, mode: "insensitive" };
+  if (type === "NIGHTLY" || type === "MONTHLY" || type === "PLOT_SALE") where.listingType = type;
+  if (roomCategory && roomCategory !== "ALL") where.roomCategory = roomCategory;
 
   let listings = await (prisma.listing as any).findMany({ where, orderBy: { createdAt: "desc" } });
 

@@ -9,15 +9,44 @@
     @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans antialiased min-h-screen flex flex-col transition-colors duration-200;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading;
+    @apply font-heading tracking-tight;
   }
 }
 
 .glass-panel {
-  @apply bg-white/90 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-white/10 shadow-xl shadow-slate-200/40 dark:shadow-none transition-colors duration-200;
+  @apply bg-white dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg shadow-slate-200/50 dark:shadow-none transition-colors duration-200;
+}
+
+.zillow-card {
+  @apply bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden hover:shadow-xl hover:border-brand-500/40 transition-all duration-300;
+}
+
+/* Custom crisp scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-400 dark:bg-slate-600;
 }
 
 /* Square Cash App Pay container */
 #cash-app-pay {
   min-height: 54px;
+}
+
+/* Square Card embed container */
+#card-container {
+  min-height: 90px;
+}
+
+/* Square card field overrides for dark theme */
+.sq-card-wrapper {
+  background: transparent !important;
 }

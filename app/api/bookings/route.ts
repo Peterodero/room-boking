@@ -5,6 +5,33 @@ import { getUser } from "../../../lib/auth";
 
 const HOLD_MINUTES = Number(process.env.BOOKING_HOLD_MINUTES || 15);
 
+export async function GET(req: NextRequest) {
+  const user = getUser(req);
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const where = user.role === "ADMIN" ? {} : { guestId: user.id };
+
+  const bookings = await (prisma.booking as any).findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+    include: {
+      listing: {
+        select: {
+          id: true,
+          title: true,
+          city: true,
+          state: true,
+          photos: true,
+          listingType: true,
+        },
+      },
+      payments: true,
+    },
+  });
+
+  return NextResponse.json(bookings);
+}
+
 // Schema for nightly booking
 const nightlySchema = z.object({
   listingId: z.string(),
@@ -22,7 +49,15 @@ const monthlySchema = z.object({
   guestCount: z.number().int().positive().default(1),
 });
 
-const createBookingSchema = z.discriminatedUnion("bookingType", [nightlySchema, monthlySchema]);
+// Schema for plot sale booking
+const plotSaleSchema = z.object({
+  listingId: z.string(),
+  bookingType: z.literal("PLOT_SALE"),
+  option: z.enum(["RESERVE_HOLD", "PAY_DEPOSIT", "BUY_OUTRIGHT"]).default("RESERVE_HOLD"),
+  guestCount: z.number().int().positive().default(1),
+});
+
+const createBookingSchema = z.discriminatedUnion("bookingType", [nightlySchema, monthlySchema, plotSaleSchema]);
 
 export async function POST(req: NextRequest) {
   const user = getUser(req);
@@ -45,6 +80,36 @@ export async function POST(req: NextRequest) {
       { error: `This listing allows at most ${listing.maxGuests} guests` },
       { status: 400 }
     );
+  }
+
+  // ── PLOT SALE BOOKING ───────────────────────────────────────────────────
+  if (parsed.data.bookingType === "PLOT_SALE") {
+    if (listing.listingType !== "PLOT_SALE") {
+      return NextResponse.json({ error: "This listing is not a plot for sale" }, { status: 400 });
+    }
+
+    const salePrice = Number(listing.salePrice) || 0;
+    const depositAmount = Number(listing.depositAmount) || Math.round(salePrice * 0.1);
+    const holdFee = Number(listing.bookingFee) || 100;
+    const option = parsed.data.option;
+
+    const initialSaleStatus = option === "BUY_OUTRIGHT" ? "BUY_OUTRIGHT" : option === "PAY_DEPOSIT" ? "DEPOSIT_PAID" : "RESERVED";
+
+    const booking = await (prisma.booking as any).create({
+      data: {
+        listingId,
+        guestId: user.id,
+        guestCount: 1,
+        totalPrice: salePrice,
+        bookingFee: holdFee,
+        depositAmount: depositAmount,
+        status: "PENDING",
+        saleStatus: initialSaleStatus,
+        holdExpiresAt: new Date(Date.now() + HOLD_MINUTES * 60 * 1000),
+      },
+    });
+
+    return NextResponse.json(booking, { status: 201 });
   }
 
   // ── MONTHLY BOOKING ──────────────────────────────────────────────────────
@@ -89,10 +154,28 @@ export async function POST(req: NextRequest) {
         data: { status: "EXPIRED", holdExpiresAt: null },
       });
 
+      // If the current guest already has an active PENDING hold for these dates, refresh and return it
+      const existingUserHold = await tx.booking.findFirst({
+        where: {
+          listingId,
+          guestId: user.id,
+          status: "PENDING",
+          checkIn: { lt: checkOut },
+          checkOut: { gt: checkIn },
+        },
+      });
+
+      if (existingUserHold) {
+        return tx.booking.update({
+          where: { id: existingUserHold.id },
+          data: { holdExpiresAt: new Date(Date.now() + HOLD_MINUTES * 60 * 1000) },
+        });
+      }
+
       const overlap = await tx.booking.findFirst({
         where: {
           listingId,
-          status: { in: ["CONFIRMED", "PENDING"] },
+          status: "CONFIRMED",
           checkIn: { lt: checkOut },
           checkOut: { gt: checkIn },
         },

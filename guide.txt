@@ -1,0 +1,35 @@
+Okay what i want is that my system always get endless photos depending on my filters e.g state, location and category(1 bed room e.t.c).Is this possible
+
+
+Yes, bro, this is 100% possible. To achieve this, you need to connect your backend database architecture to external Real Estate APIs instead of basic stock photo APIs.Stock photography sites (like Unsplash) do not understand filters like "1-bedroom in Austin, Texas." Real estate platforms, however, return structured JSON feeds containing real geographic details and array lists of specific property photos. [1] (https://rapidapi.com/info-UzmhEs339/api/zillow-property-data1), [2] (https://rapidapi.com/collection/zillow-alternatives)Here is how you can set up your system pipeline to handle endless filtered photos:🚀 The Recommended Dev Strategy: Use a Real Estate APIInstead of building a massive scraping tool yourself, use an aggregator on RapidAPI to tap into live U.S. rental databases (like Zillow, Realtor, or Redfin API wrappers). [1] (https://rapidapi.com/scrapewizard-scrapewizard-default/api/property-finder4), [2] (https://rapidapi.com/info-UzmhEs339/api/zillow-property-data1)1. The Request Query LogicWhen a client sets a filter on your frontend, your server converts those variables into an API GET request: [1] (https://www.linkedin.com/pulse/retrieving-real-estate-data-from-zillow-api-python-rick-ramirez), [2] (https://rapidapi.com/collection/zillow-alternatives)javascript// Example Server-Side API Query Logic
+const queryParams = {
+  location: "Austin, TX",   // Maps to your State/Location filter
+  bathsMin: 1,
+  bedsMin: 1,               // Maps to your "1-Bedroom" category filter
+  bedsMax: 1,
+  status_type: "ForRent"    // Limits it exclusively to rentals
+};
+Use code with caution.2. The JSON Data PayloadsThe API will return an array of active property objects. Your system can parse through the data schema to pull the list of image URLs attached to that specific matching room: [1] (https://rapidapi.com/collection/zillow-alternatives), [2] (https://www.linkedin.com/pulse/retrieving-real-estate-data-from-zillow-api-python-rick-ramirez), [3] (https://rapidapi.com/info-UzmhEs339/api/zillow-property-data1)json{
+  "zpid": "209485721",
+  "address": {
+    "state": "TX",
+    "city": "Austin",
+    "streetAddress": "123 Main St"
+  },
+  "bedrooms": 1,
+  "rentEstimate": 1650,
+  "imgSrc": "https://zillowstatic.com",
+  "images": [
+    "https://zillowstatic.com",
+    "https://zillowstatic.com"
+  ]
+}
+Use code with caution.🛠️ Alternative Plan: The Mock "Faker" SystemIf you don't want to use live production real estate APIs during your current development phase, you can write a short seeding script using open-source packages:Use Faker.js to generate infinite realistic U.S. addresses, states, and room counts dynamically.Map specific image keywords to the categories. For example, if your category loop detects beds: 1, it dynamically appends a random photo string from a stored array of stock apartment images you downloaded earlier.⚠️ A Warning on Production HotlinkingIf you pull "endless live photos" via real estate scraping APIs, do not hotlink directly to their image source URLs in production. Corporate servers frequently rotate their image tokens, which will result in broken 404 image not found errors on your frontend over time.Best Practice: Have your system download the image via the API payload, pass it into a cloud storage engine (like AWS S3 or Cloudinary), and store your own persistent URL asset pointer inside your SQL database.
+
+Is it free?
+
+ How to keep it 100% FREE during developmentIf you are just building and prototyping right now, you should not spend a single penny. Use these two developer workarounds to keep your system free:1. Use the Free Sandboxes on RapidAPIGo to RapidAPI and search for "Zillow Real Estate API" or "Realtor API".They will give you a Basic Free Plan that lets you make a handful of real-time search queries every month for free.You can use this free allowance to test your backend filter logic (state="TX", beds=1) and make sure your system parses the photo arrays correctly.2. Build a Local Mock DatabaseIf you just need your app to look like it has endless data while you build out the frontend, write a script to generate random data locally. You can use standard stock photos as placeholders.Hardcode a pool of 50 free room image URLs from Unsplash.Write a function that maps those images randomly whenever a user selects "1 Bedroom". This costs $0 and gives you unlimited testing.
+
+
+
+ curl -i -X POST https://onlinetraffic.mzigo.ke/api/auth/login -H "Content-Type: application/json" -d '{"username": "admin", "password": "test"}'

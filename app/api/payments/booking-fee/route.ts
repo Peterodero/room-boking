@@ -30,15 +30,32 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
-  if (booking.holdExpiresAt && booking.holdExpiresAt < new Date()) {
-    await prisma.booking.update({
-      where: { id: booking.id },
-      data: { status: "EXPIRED", holdExpiresAt: null },
+  // Check if someone else already completed payment for this listing/dates
+  if (booking.checkIn && booking.checkOut) {
+    const alreadyConfirmed = await prisma.booking.findFirst({
+      where: {
+        listingId: booking.listingId,
+        status: "CONFIRMED",
+        id: { not: booking.id },
+        checkIn: { lt: booking.checkOut },
+        checkOut: { gt: booking.checkIn },
+      },
     });
-    return NextResponse.json(
-      { error: "This booking hold has expired. Please rebook." },
-      { status: 410 }
-    );
+    if (alreadyConfirmed) {
+      return NextResponse.json({ error: "Another customer has already completed payment for these dates." }, { status: 409 });
+    }
+  } else {
+    // For plots/monthly, check if another confirmed booking exists
+    const alreadyConfirmed = await prisma.booking.findFirst({
+      where: {
+        listingId: booking.listingId,
+        status: "CONFIRMED",
+        id: { not: booking.id },
+      },
+    });
+    if (alreadyConfirmed) {
+      return NextResponse.json({ error: "Another customer has already completed payment for this listing." }, { status: 409 });
+    }
   }
 
   const amountCents = Math.round(Number(booking.bookingFee) * 100);
