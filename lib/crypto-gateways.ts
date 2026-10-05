@@ -148,7 +148,7 @@ export async function createOxaPayInvoice({
   payAmount: number;
   payCurrency: string;
   expiresAt: string;
-  payLink: string;
+  payLink: string | null;
   isSimulation?: boolean;
 }> {
   const merchantKey = process.env.OXAPAY_MERCHANT_KEY || process.env.OXAPAY_API_KEY;
